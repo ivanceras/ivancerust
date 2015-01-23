@@ -105,7 +105,7 @@ Files
 struct Voxel{
     voxel:Vector[u8],
     leaf:bool,
-    file:i64,
+    file:i32,
 }
 
 ```
@@ -200,6 +200,33 @@ Seeking of more details of voxels will be terminated by:
 2. It is not a leaf, but the LOD is high enough that seeking more details will no longer affect the rendering.
 
 This means that on the root first byte that the only area of the voxel resides on the first octant.
+
+Voxel file will be stored on disk as:
+
+Ideal:
+```
+[8 bits][2 bits][32 bits]
+```
+first 8 bits is the octree
+next 2 bits is determines whether a leaf node or branch, and if more detail is in a file numbered in the 32 bits.
+1 voxel(8 octants) is defined by 10 bits on average. Some will be 42 bits if there is more detail on that voxel stored in another file. The filename is the number, this allows us to partition data into another file, while not having to read the necessary sequence of data to determine the voxel data at a certain location.
+
+
+Efficient Calculations:
+The data is structured in an octree, traversal of data will be as efficient as octree data structure.
+In order for the alogrithm to be efficient as possible, there should be a minimal use of complex calculation.
+Finding for the voxels at a certain camera possition is no more than comparing voxels.
+The ray, at each certain LOD(level of detail) falls on a certain voxel. Determining the right voxel at the right LOD is comparing the ray in voxel representation at certain direction with LOD will be compared to the array of voxels to be viewed.
+
+
+
+
+
+
+
+
+
+
 
 
 
