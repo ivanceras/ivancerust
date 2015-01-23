@@ -220,8 +220,18 @@ The ray, at each certain LOD(level of detail) falls on a certain voxel. Determin
 
 
 
+Extraction of voxels from the camera position is by extracting the all the voxels at certain sphere level where in the the LOD is fading when it reaches far away from the camera location.
+
+When using a slimmer FOV (i.e lenses, telescope), the LOD will fade very slowly at the direction where the camera is facing (it's frustum view).
+
+The extraction of voxel is spherical outward, more detail near the center, while loosing detail as it expands farther.
+
+At certain point in the sphere where a voxel is found at a satisfied LOD, the search on that point is terminated, and will be used for the calculation of the final image.
 
 
+Spherical outward search is terminated at 2 conditions:
+* A voxel is found at a satisfied/required LOD.
+* No voxel is found until it reached the whole voxel tree, including the root tree, the universe.
 
 
 
