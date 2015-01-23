@@ -5,32 +5,7 @@ Unlimited detail voxel engine in rust
 Voxel renderer
 
 
-Files
 
-* .vox  - contains the voxel bit data
-* .leaf - determines whether the voxel is a leaf or not
-* .file - the voxel data is not a leaf and it resides in a new file
-
-```
-
-struct Voxel{
-    voxel:Vector[u8],
-    leaf:bool,
-    file:i64,
-}
-
-```
-
-Mostly CPU's a re 64 bit.
-
-Computation of operands should only be using 32 bits in order to get away with overflows in integer computation.
-
-```
-2^32 bits = 1 << 33 = 8_589_934_592 = 2048 * 2048 * 2048
-```
-
-
-the largest file will be 8 gig 8_589_934_592 voxels
 
 ##LOD
 
@@ -115,5 +90,58 @@ This would lead to
 10_691_619_427 max voxels on the near plane
 
 
+##Storing the data efficiently.
 
+Storing voxel data can be disk consuming, but if we do it right, we can get an impressive way of storing it.
+
+Files
+
+* .vox  - contains the voxel bit data
+* .leaf - determines whether the voxel is a leaf or not
+* .file - the voxel data is not a leaf and it resides in a new file
+
+```
+
+struct Voxel{
+    voxel:Vector[u8],
+    leaf:bool,
+    file:i64,
+}
+
+```
+
+Mostly CPU's a re 64 bit.
+
+Computation of operands should only be using 32 bits in order to get away with overflows in integer computation.
+
+```
+2^32 bits = 1 << 33 = 8_589_934_592 = 2048 * 2048 * 2048
+```
+
+
+the largest file will be 8 gig 8_589_934_592 voxels
+
+* .vox file contains a series of `0`'s and `1`'s, which just tell if the voxel is empty or not.
+1 voxel is 1 bit and can be inspected more in detail by looking at the octree. Octree is 8 bits, and each of these bits is also a voxel or octant. The relative distance of each octant to the center of the voxel is determine by its position on the bits.
+
+
+1 octree has 8 elements, each can be accessed with index 0-7
+```
+at bit[0]:  {-1.0, -1.0, -1.0}
+
+at bit[1]:  { 1.0, -1.0, -1.0}
+
+at bit[2]:  {-1.0,  1.0, -1.0}
+
+at bit[3]:  { 1.0,  1.0, -1.0}
+
+at bit[4]:  {-1.0, -1.0,  1.0}
+
+at bit[5]:  { 1.0, -1.0,  1.0}
+
+at bit[6]:  {-1.0,  1.0,  1.0}
+
+at bit[7]:  { 1.0,  1.0,  1.0}
+
+```
 
