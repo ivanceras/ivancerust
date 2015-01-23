@@ -235,8 +235,51 @@ Spherical outward search is terminated at 2 conditions:
 
 
 
+##LOD Calculation
+LOD depends on your image size (e.g 1920x1080 ) , FOV angle and the zoom.
+LOD is directly proportional to ZOOM, the higher the zoom, the higher the LOD.
+At distance 0 from the projection plane, the LOD should be no more than 1 pixel wide, unless it is the leaf voxel.
 
 
+##Location
+Where is the camera location from the voxel tree.
+As opposed to common 3D engines, the camera space will be relative to the root voxel.
+So, the camera location will also be expressed in terms of voxel location.
+There is only 1 (1)'s in every node of the octree, since the camera has only 1 location
+as oppose to voxels where is occupies multiple areas of the voxel.
 
+```
+struct Camera{
+   location:Vec[u8];
+}
+```
+```
+camera = vec![
+ 000000001,
+ 000000001,
+ 000000001,
+ 000000001,
+ 
+ 000000001,
+ 000000001,
+ 000000001,
+ 000000001,
 
+...
+]
+```
 
+Once the camera location is specified, the voxel octree will be traversed in accordance with the camera. If the traversal encounters 0, it means there is nothing there.
+The extraction of points starts at the octree where the value is 1, outwards. The LOD will be determine by LOD difference of the camera and the encountered octree, and is affected by the distance and zoom. 
+
+new structure of the Voxel
+
+```
+struct Voxel{
+    voxel:Vector[u8],
+    leaf:bool,
+    detail: Voxel,
+}
+```
+
+![Figure traversal](http://ivanceras.github.io/ivancerust/traversal.svg)
