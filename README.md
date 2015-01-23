@@ -145,3 +145,61 @@ at bit[7]:  { 1.0,  1.0,  1.0}
 
 ```
 
+##Root voxel
+The root voxel is most engine is the world.
+Let's make our root voxel the universe. This is the largest possible world your game could be.
+Let's assume that the universe is divided into 1 << 33 parts, so you will have 0's in most of the areas. 1 only in the place where you are concerned. say at 2048, 2048, 2048 LOD, the planet earth resides. This will be the basis of your computation.
+
+.vox
+
+```
+byte[0] : 0000 0001
+byte[1] : 0000 0001
+byte[2] : 0000 0001
+byte[3] : 0000 0001
+
+byte[4] : 0000 0001
+byte[5] : 0000 0001
+byte[6] : 0000 0001
+byte[7] : 0000 0001
+
+byte[8] : 0000 0001
+byte[9] : 0000 0001
+byte[10] : 0000 0001
+
+
+```
+.leaf
+```
+0000 0000
+0000 0000
+0000 0000
+0000 0000
+
+0000 0000
+0000 0000
+0000 0000
+0000 0000
+
+0000 0000
+0000 0000
+0000 0000
+0000 0001
+
+```
+
+
+.file
+```
+
+```
+
+
+Seeking of more details of voxels will be terminated by:
+1. If a leaf is encountered - meaning no more details at this level
+2. It is not a leaf, but the LOD is high enough that seeking more details will no longer affect the rendering.
+
+This means that on the root first byte that the only area of the voxel resides on the first octant.
+
+
+
