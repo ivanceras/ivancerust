@@ -272,7 +272,7 @@ camera = vec![
 Once the camera location is specified, the voxel octree will be traversed in accordance with the camera. If the traversal encounters 0, it means there is nothing there.
 The extraction of points starts at the octree where the value is 1, outwards. The LOD will be determine by LOD difference of the camera and the encountered octree, and is affected by the distance and zoom. 
 
-new structure of the Voxel
+new structure of the Voxel in memory
 
 ```
 struct Voxel{
@@ -281,5 +281,60 @@ struct Voxel{
     detail: Voxel,
 }
 ```
+
+Voxel reprensentation in file
+```
+voxel:8bit, 
+leaf:1bit,
+infile:1bit,
+file:32bit,
+```
+
+With more detail such as the Normal and the Color of the voxel
+
+```
+struct Voxel{
+  octree:Vector[u8],
+  leaf:bool,
+  normal:Normal,
+  color:Color,
+  detail:Voxel,
+}
+
+struct Normal{
+ f32:x,
+ f32:y,
+ f32:z
+}
+
+struct Color{
+ f32:red,
+ f32:green,
+ f32:blue,
+}
+
+```
+
+In File:
+```
+voxel:8bit,
+leaf:1bit
+normal:{x:8bit, y:8bit z:8bit}
+color:{red:8bit, green: 8bit, blue:8bit},
+infile:1bit,
+file:32bit,
+```
+
+Material
+Transparency, difuse rate, reflectivity may be added in the future
+
+
+
+Compression:
+Next succedding normal can be just an increment of the parent normal.
+Next succedding color can also be just an increment/offset of the parent color.
+
+
+
 
 ![Figure traversal](http://ivanceras.github.io/ivancerust/traversal.svg)
