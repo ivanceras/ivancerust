@@ -338,3 +338,15 @@ Next succedding color can also be just an increment/offset of the parent color.
 
 
 ![Figure traversal](http://ivanceras.github.io/ivancerust/traversal.svg)
+
+
+Let ijk, is the direction of the rays from the camera.
+
+Screen projection 1920x1080 at FOV 90 degree, the distance from the screen to the eye:
+
+eye = sin(90) * (1920/2)
+eye = 960
+
+At ray i,j,k in LOD 11.
+
+
