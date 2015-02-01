@@ -349,4 +349,14 @@ eye = 960
 
 At ray i,j,k in LOD 11.
 
+##Voxel at the highest detail.
+voxel at the highest detail ca be accessed by the index 
+
+```
+index = x*xmax+y*ymax+z*zmax //needs correction
+```
+Linearly encoding it in will have to use z-order curve / morton encode.
+
+
+
 
