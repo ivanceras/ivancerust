@@ -13,14 +13,15 @@ fn main(){
     println!("radius: {}", r);
     let max_morton = morton(limit-1, limit-1, limit-1, bits);
     println!("max_morton: {}", max_morton);
-    bit_index(max_morton);
     //set the center
     
     let xlimit = limit;
     let ylimit = limit;
     let zlimit = limit;
     
-    make_array(xlimit, ylimit, zlimit);
+    let mut bitset = make_array(xlimit, ylimit, zlimit);
+    //set_bit(&mut bitset, max_morton, true);
+    //display_bitset(bitset);
     
     let cx = xlimit/2;
     let cy = ylimit/2;
@@ -29,7 +30,7 @@ fn main(){
     let mut inside:u64 = 0;
     let mut outside:u64 = 0;
     let calc_total:f64 = (xlimit as f64) * (ylimit as f64) * (zlimit as f64);
-     println!("calc_total {} or {}", calc_total, (xlimit * ylimit * zlimit));
+    println!("calc_total {} or {}", calc_total, (xlimit * ylimit * zlimit));
     let mut actual_total:u64 = 0;
     let mut percentage:u64 = 0;
     let mut inline:u64 = 0;
@@ -62,10 +63,12 @@ fn main(){
                   if rounded_sqrt_ijk == r {
                     inside += 1;
                     inline += 1;
+                    set_bit(&mut bitset, m, true);
                   }
                   
                   else if sqrt_iijjkk < r as f64 {
                     inside += 1;
+                    set_bit(&mut bitset, m, true);
                   }
                   else {
                     outside += 1;
@@ -74,7 +77,7 @@ fn main(){
               }
         }    
     }
-    
+    display_bitset(bitset);
     println!("inside: {}", inside);
     println!("outside: {}", outside);
     println!("inline: {}", inline);
@@ -97,7 +100,7 @@ fn morton(x:u64, y:u64, z:u64, bits:u8)->u64{
 	answer
 }
 
-fn make_array(xlimit:u64, ylimit:u64, zlimit:u64){
+fn make_array(xlimit:u64, ylimit:u64, zlimit:u64)->Vec<u8>{
 	let mut bitset:Vec<u8> = Vec::new();
 	for i in range (0, xlimit){
         for j in range (0, ylimit) {
@@ -111,10 +114,28 @@ fn make_array(xlimit:u64, ylimit:u64, zlimit:u64){
         }
     }
     println!("bitset length: {}",bitset.len());
+    bitset
 }
 
-fn bit_index(index:u64){
-	let byte_index = index / 8;
+fn set_bit(bitset:&mut Vec<u8>, index:u64, val:bool){
+
+	let byte_index = (index / 8) as usize;
 	let remainder = index % 8;
-	println!("byte:[{}], rem: {}",byte_index, remainder);
+	println!("byte_index:[{}], rem: {}",byte_index, remainder);
+	let byte = bitset[byte_index];
+	println!("byte_value: {} ", byte);
+	println!("new value at {}: {}", remainder, val);
+	if val {
+	    let or_byte = 1 << remainder;
+	    let new_byte = byte | or_byte;
+        bitset[byte_index] = new_byte;
+        println!("new_byte: {}", new_byte);
+	}
+}
+
+fn display_bitset(bitset: Vec<u8>){
+    let len = bitset.len();
+    for i in range (0, len) {
+        println!("{}", bitset[i]);
+    }
 }
