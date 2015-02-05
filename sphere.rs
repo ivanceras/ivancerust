@@ -4,7 +4,7 @@
 
 use std::num::Float;
 fn main(){
-	let lod:u8 = 8;
+	let lod:u8 = 11;
     let limit:u64 = 1 << lod;
     let r:u64 = 1 << lod-2;//do a radius of half the limit
 
@@ -113,6 +113,7 @@ fn main(){
     let mut parent = ret_bitset;
    	for l in range (0, lod-1){
     	parent = parent_bitset(parent);
+    	println!("ITERATION: {}",l);
     	display_bitset_slice(parent.as_slice());
     }
 }
