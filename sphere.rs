@@ -4,7 +4,7 @@
 
 use std::num::Float;
 fn main(){
-	let lod:u8 = 11;
+	let lod:u8 = 5;
     let limit:u64 = 1 << lod;
     let r:u64 = 1 << lod-2;//do a radius of half the limit
 
@@ -107,8 +107,8 @@ fn main(){
     //let great_grand_parent = parent_bitset(ret_grand_parent);//ideal for 5 LOD
     //display_bitset(great_grand_parent);
 
-    println!("GRID..");
-    display_bitset(grid);
+    //println!("GRID..");
+    //display_bitset(grid);
     
     let mut parent = ret_bitset;
    	for l in range (0, lod-1){
@@ -194,11 +194,25 @@ fn parent_bitset(bitset: Vec<u8>)->Vec<u8>{
 }
 
 fn display_bitset(bitset: Vec<u8>)->Vec<u8>{
+    let mut count:u64 = 0;
     let len = bitset.len();
     for i in range (0, len) {
         println!("[{}]: {}",i, bitset[i]);
+        count+= count_bits(bitset[i]) as u64;
     }
+    println!("There are a total of {} voxels",count);
     bitset
+}
+
+
+fn count_bits(arg:u8)->u8 {
+        let mut count:u8 = 0;
+        let mut x = arg;
+        while x > 0 {
+            x &= x-1;
+            count += 1;
+        }
+        count
 }
 
 fn display_bitset_slice(bitset: &[u8]){
