@@ -1,3 +1,6 @@
+//voxel.rs
+use std::fmt;
+
 pub struct Voxel{
     bitset:Vec<u8>,
     indexes:Vec<u64>
@@ -60,7 +63,8 @@ impl Voxel{
             println!("{}",i);
         }
     }
-    pub fn display_bitset(&self){
+    
+    /*pub fn display_bitset(&self){
         println!("Showing bitsets....");
         assert!(self.indexes.len() == self.bitset.len());
         let len = self.bitset.len();
@@ -72,15 +76,12 @@ impl Voxel{
         }
         println!("There are total of {} voxels",count);
     }
+    */
     
     //get the parent bit_set of this bitset
     pub fn parent(&self)->Voxel{
 	    println!("Getting the parent bitset...");
 	    let len = self.indexes.len();
-	    let voxel_capacity:u64 = len as u64 * 8;
-	    println!("voxel_capacity: {}",voxel_capacity);
-	    println!("Grouped by 8, it will then have {}",voxel_capacity/8);
-	    let parent_voxel_size = voxel_capacity as u64 / 8; //which is obviously still equal to len, but it is easier to think in voxel context
 	    let mut parent_bitset = Voxel::new();
 	    for i in range (0, len) {
 	        let bitset_index = self.indexes[i];
@@ -99,6 +100,19 @@ impl Voxel{
     }
     
     
+}
+
+impl fmt::String for Voxel {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+     	let len = self.bitset.len();
+     	let mut s = String::new();
+    	for i in range (0, len) {
+            let bitset_index = self.indexes[i];
+            let line = format!("[{}]: {}\n",bitset_index, self.bitset[i]);
+            s.push_str(line.as_slice());
+         }
+         write!(f, "{}",s)
+    }
     
 }
 
