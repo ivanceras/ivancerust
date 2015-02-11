@@ -5,11 +5,17 @@ use voxel::Voxel;
 use ray::Ray;
 use vector::Vector;
 use point::Point;
+use screen::Screen;
+use color::Color;
+
+use std::io::File;
 
 mod voxel;
 mod ray;
 mod vector;
 mod point;
+mod screen;
+mod color;
 
 struct Voxelizer{
 	lod:u8,
@@ -31,7 +37,7 @@ struct Voxelizer{
     inline:u64,
     counter:u64,
     
-    voxel:Voxel,
+    voxel:Voxel, //the highest resolution voxel
     
     lod_list:Vec<u8>, //level of detail for each voxel
 	lod_voxels:Vec<Voxel>, //voxels with the LOD
@@ -167,18 +173,18 @@ impl Voxelizer{
      fn hit_at_lod(&self, x:i64, y:i64, z:i64, lod:u8)->bool{
      	let bounded = self.bounded(x, y, z);
      	if !bounded {
-    		println!("{} {} {} not bounded..",x, y, z);
+    		//println!("{} {} {} not bounded..",x, y, z);
     		return false;
     	}
     	let (xlod, ylod, zlod) = self.at_lod(x, y, z, lod);
     	let index = self.lod - (lod+1);
-    	println!("index: {}", index);
+    	//println!("index: {}", index);
     	let m = morton(xlod as u64, ylod as u64, zlod as u64, lod);
-    	println!("{},{},{} ",x,y,z);
-    	println!("{},{},{} morton: {}",xlod, ylod, zlod, m);
-    	println!("voxels: \n {}", self.lod_voxels[index as usize]);
+    	//println!("{},{},{} ",x,y,z);
+    	//println!("{},{},{} morton: {}",xlod, ylod, zlod, m);
+    	//println!("voxels: \n {}", self.lod_voxels[index as usize]);
     	let isset = self.lod_voxels[index as usize].isset(m);
-    	println!("isset: {}", isset);
+    	//println!("isset: {}", isset);
     	isset
     }
     
@@ -194,9 +200,9 @@ impl Voxelizer{
     			hit_counter += 1;
     		}
     	}
-    	println!("hit counter: {}", hit_counter);
+    	//println!("hit counter: {}", hit_counter);
     	if hit_counter == self.lod -1 {
-    		println!("all lower LOD are hit.. trying the highest detail..");
+    		//println!("all lower LOD are hit.. trying the highest detail..");
     		return self.hit_direct(x,y,z);
     	}
     	true
@@ -255,10 +261,12 @@ fn morton_decode(morton:u64, lod:u8)->(u64, u64, u64){
  
 
 fn main(){
-	let lod:u8 = 5;
+	let lod:u8 = 9;
     let limit:u64 = 1 << lod;
-    let r:u64 = 1 << lod-2;//do a radius of half the limit
+    let r:u64 = 1 << lod-1;//do a radius of half the limit
     let mut voxelizer = Voxelizer::new(lod, limit, r);
+    let max_distance = ((limit * limit * limit ) as f64).sqrt().round() as u64;
+    println!("max distance: {}", max_distance);
     voxelizer.start();
     //voxelizer.debug();
     //voxelizer.voxel.show_indexes();
@@ -280,7 +288,7 @@ fn main(){
     let cy = (limit/2) as i64;
     let cz = (limit/2) as i64;
 
-	//at -z
+	//put the camera away from sphere in z direction, slightly up and slightly right
     let xorig = (limit as i64/2) + 10;
     let yorig = (limit as i64/2) + 10;
     let zorig = -(limit as i64);
@@ -297,7 +305,7 @@ fn main(){
 	
 	println!("vector: {}",v);
 	
-    let r = Ray::new(xorig, yorig, zorig, v, lod);//1 ray
+    let r = Ray::new(xorig, yorig, zorig, v, lod);//this is the center ray, base on this ray compute the other ray at the sides
     let mut p = 0;
 	
 
@@ -311,11 +319,74 @@ fn main(){
     	}
     	p += 1;
     }
+    let vx = dx;//v.x;
+    let vy = dy;//v.y;
+    let vz = dz;//v.z;
     
-
+    let width = 800;
+    let height = 600;
+    let fd = width/2;
+    let screen = Screen::new(width, height, vx, vy, vz, fd);
+    screen.compute_rays();
+    let r00 = screen.at_pixel(0,0);
+    println!("ray00: {}",r00);
+    println!("center: {}",screen.at_pixel(50,50));
     
+    
+    let total = width * height;
+	println!("total: {}", total);
+	let mut pixels:Vec<Color> =Vec::new();
+	for t in range(0, total){
+	    pixels.push(Color{r:255,g:255,b:255});
+	}
+    
+    let mut cnt = 0;
+    for iy in range(0, height){
+		for jx in range(0,width){
+			let pixel_vector = screen.at_pixel(jx, iy);
+			//println!("pixel vector: {}",pixel_vector);
+			let pixel_ray = Ray::new(xorig, yorig, zorig, pixel_vector, lod);
+			let mut length = 0;
+			let index = iy * width + jx;
+			println!("index: {} cnt: {}", index,cnt);
+			loop {
+				let point = pixel_ray.at_length(length);
+				//println!("point: {}", point);
+				let hit = voxelizer.hit_optimize(point.x, point.y, point.z);
+				if hit {
+					pixels[index as usize] = Color{r:0,g:0,b:0};
+					break;
+				}
+				if length >= max_distance {
+					//pixels[index as usize] = Color{r:255,g:255,b:255};
+					break;
+				}
+				length += 1;
+			}
+			cnt += 1;
+		}
+    }
+    
+    save_to_file(pixels, width, height);
 }
 
+
+
+fn save_to_file(pixels:Vec<Color>, width:i64, height:i64){
+
+	let mut file = File::create(&Path::new("pic.ppm"));
+	let header = String::from_str(format!("P6\n# CREATOR: lee\n").as_slice());
+	file.write(header.into_bytes().as_slice());
+
+	let size = String::from_str(format!("{} {}\n255\n", width, height).as_slice());
+	file.write(size.into_bytes().as_slice());
+
+	for p in range(0,pixels.len()){
+		file.write_u8(pixels[p].r);
+		file.write_u8(pixels[p].g);
+		file.write_u8(pixels[p].b);
+	}
+}
 
 #[test]
 fn morton_test() {

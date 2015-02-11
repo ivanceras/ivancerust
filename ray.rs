@@ -21,9 +21,9 @@ impl Ray{
 		let xlimit = limit;
         let ylimit = limit;
         let zlimit = limit;
-		println!("calc_total {}", (zlimit * ylimit * zlimit));
+		//println!("calc_total {}", (zlimit * ylimit * zlimit));
 		let unit_dir = dir.unit_vector();
-		println!("unit vector: {}",unit_dir);
+		//println!("unit vector: {}",unit_dir);
 		Ray{orig:orig, dir:dir, unit_dir: unit_dir, lod:lod}
 		
 	}

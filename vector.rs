@@ -10,7 +10,11 @@ pub struct Vector{
 
 impl Vector{
 
-	fn distance(&self)->f64{
+    pub fn new(x:f64, y:f64, z:f64)->Vector{
+        Vector{x:x, y:y, z:z}
+    }
+
+	pub fn distance(&self)->f64{
 		(self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
 	}
 	
