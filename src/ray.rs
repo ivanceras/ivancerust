@@ -51,11 +51,3 @@ impl Ray{
 	
 }
 
-fn morton(x:u64, y:u64, z:u64, lod:u8)->u64{
-	let mut answer:u64 = 0;
-	
-	for i in range(0, lod) {
-		answer |= ((x & (1 << i)) << 2*i) | ((y & (1 << i)) << (2*i + 1)) | ((z & (1 << i)) << (2*i + 2));
-	}
-	answer
-}

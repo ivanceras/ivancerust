@@ -7,17 +7,11 @@ use vector::Vector;
 use point::Point;
 use screen::Screen;
 use color::Color;
+use morton::morton;
 
-use std::io::File;
+use std::old_io::File;
 
-mod voxel;
-mod ray;
-mod vector;
-mod point;
-mod screen;
-mod color;
-
-struct Voxelizer{
+pub struct Voxelizer{
 	lod:u8,
     limit:u64,
     r:u64,
@@ -40,13 +34,13 @@ struct Voxelizer{
     voxel:Voxel, //the highest resolution voxel
     
     lod_list:Vec<u8>, //level of detail for each voxel
-	lod_voxels:Vec<Voxel>, //voxels with the LOD
+	pub lod_voxels:Vec<Voxel>, //voxels with the LOD
 }
 
 impl Voxelizer{
 
-    fn new(lod:u8, limit:u64, r:u64)->Voxelizer{
-        let mut voxel = Voxel::new();
+    pub fn new(lod:u8, limit:u64, r:u64)->Voxelizer{
+        let mut voxel = Voxel::new(lod);
         
         let xlimit = limit;
         let ylimit = limit;
@@ -85,9 +79,9 @@ impl Voxelizer{
           }
     }
     
-    fn start(&mut self){
+    pub fn start(&mut self){
         for i in range (0, self.xlimit){
-        let new_percentage = (i as f64/self.limit as f64 * 100.0) as u64;
+        let new_percentage = ((i as f64/self.xlimit as f64) * 100.0).round() as u64;
         if new_percentage != self.percentage {
             println!("{} %", self.percentage);
         }
@@ -110,13 +104,13 @@ impl Voxelizer{
                   if rounded_sqrt_ijk == self.r {
                     self.inside += 1;
                     self.inline += 1;
-                    self.voxel.set_bit(m, true);
+                    self.voxel.set_bit_at_loc(i, j, k, true);
                     //println!("inside: {}, {}, {} morton: {}",i,j,k, m);
                   }
                   
                   else if sqrt_iijjkk < self.r as f64 {
                     self.inside += 1;
-                    self.voxel.set_bit(m, true);
+                    self.voxel.set_bit_at_loc(i, j, k, true);
                     //println!("inside: {}, {}, {} morton: {}",i,j,k, m);
                   }
                   else {
@@ -161,7 +155,7 @@ impl Voxelizer{
     fn hit_direct(&self, x:i64, y:i64, z:i64)->bool{
     	let bounded = self.bounded(x, y, z);
     	if !bounded {
-    		println!("{} {} {} not bounded..",x, y, z);
+    		//println!("{} {} {} not bounded..",x, y, z);
     		return false;
     	}
     	let m = morton(x as u64, y as u64, z as u64, self.lod);
@@ -189,7 +183,7 @@ impl Voxelizer{
     }
     
     //recursively checks at low LOD first if it hits, proceeds to the highest detail if all lowe level LOD's are hit
-    fn hit_optimize(&self, x:i64, y:i64, z:i64)->bool{
+    pub fn hit_optimize(&self, x:i64, y:i64, z:i64)->bool{
     	let mut hit_counter = 0;
     	for detail in range(1, self.lod){
     		let hit = self.hit_at_lod(x, y, z, detail);
@@ -208,6 +202,11 @@ impl Voxelizer{
     	true
     }
     
+    pub fn get_color(&self, x:i64, y:i64, z:i64)->Color{
+        let m = morton(x as u64, y as u64, z as u64, self.lod);
+        self.voxel.get_color(m)
+    }
+    
     //get the x,y,z at given lod
     fn at_lod(&self, x:i64, y:i64, z:i64, new_lod:u8)->(i64, i64, i64){
     	//println!("current lod: {} --> {}", self.lod, new_lod);
@@ -221,7 +220,7 @@ impl Voxelizer{
     }
     
     //build the voxel LOD's at each level of detail
-    fn build_voxel_lod(&mut self){
+    pub fn build_voxel_lod(&mut self){
     	 let mut parent_voxel = self.voxel.clone();
     	 for i in range(0, self.lod){
     	 	//println!("Building voxel at LOD: {}", i);
@@ -236,145 +235,17 @@ impl Voxelizer{
  }  
 
  
-fn morton(x:u64, y:u64, z:u64, lod:u8)->u64{
-	let mut answer:u64 = 0;
-	for i in range(0, lod) {
-		answer |= ((x & (1 << i)) << 2*i) | ((y & (1 << i)) << (2*i + 1)) | ((z & (1 << i)) << (2*i + 2));
-	}
-	answer
-}
-
-// decode a given 64-bit morton code to an integer (x,y,z) coordinate
-fn morton_decode(morton:u64, lod:u8)->(u64, u64, u64){
-	let mut x = 0;
-	let mut y = 0;
-	let mut z = 0;
-	for i in range (0, lod) {
-		x |= ((morton & ( 1  << 3 * i + 0)) >> ((3 * i) + 0)-i);
-		y |= ((morton & ( 1  << 3 * i + 1)) >> ((3 * i) + 1)-i);
-		z |= ((morton & ( 1  << 3 * i + 2)) >> ((3 * i) + 2)-i);
-	}
-	(x, y, z)
-}
 
 
  
 
-fn main(){
-	let lod:u8 = 9;
-    let limit:u64 = 1 << lod;
-    let r:u64 = 1 << lod-1;//do a radius of half the limit
-    let mut voxelizer = Voxelizer::new(lod, limit, r);
-    let max_distance = ((limit * limit * limit ) as f64).sqrt().round() as u64;
-    println!("max distance: {}", max_distance);
-    voxelizer.start();
-    //voxelizer.debug();
-    //voxelizer.voxel.show_indexes();
-    voxelizer.build_voxel_lod();
-    
-    
-    
-    println!("Displaying voxels at all levels..");
-    let levels = voxelizer.lod_voxels.len();
-    println!("levels: {}", levels);
-    for lev in range (0, levels){
-    	let actual_lod = lod - (lev+1) as u8;
-    	println!("at actual lod: {}",actual_lod);
-    	println!("{}",voxelizer.lod_voxels[lev]);
-    }
-    
-    //look at the center of the sphere
-    let cx = (limit/2) as i64;
-    let cy = (limit/2) as i64;
-    let cz = (limit/2) as i64;
-
-	//put the camera away from sphere in z direction, slightly up and slightly right
-    let xorig = (limit as i64/2) + 10;
-    let yorig = (limit as i64/2) + 10;
-    let zorig = -(limit as i64);
-    
-    println!("origin: {}, {}, {}", xorig, yorig, zorig);
-    println!("looking at: {}, {}, {}", cx, cy, cz);
-
-	//distance
-	let dx = (cx - xorig) as f64;
-	let dy = (cy - yorig) as f64;
-	let dz = (cz - zorig) as f64;
-	
-	let v = Vector{x:dx, y:dy, z:dz};
-	
-	println!("vector: {}",v);
-	
-    let r = Ray::new(xorig, yorig, zorig, v, lod);//this is the center ray, base on this ray compute the other ray at the sides
-    let mut p = 0;
-	
-
-    loop {
-    	let point = r.at_length(p);
-		let hit = voxelizer.hit_optimize(point.x, point.y, point.z);
-		//let hit_lod = voxelizer.hit_at_lod(point.x, point.y, point.z, 4);
-		if hit {
-			println!("hit at: {}, {}, {} --> {} ", point.x, point.y, point.z, hit);
-    		break;
-    	}
-    	p += 1;
-    }
-    let vx = dx;//v.x;
-    let vy = dy;//v.y;
-    let vz = dz;//v.z;
-    
-    let width = 800;
-    let height = 600;
-    let fd = width/2;
-    let screen = Screen::new(width, height, vx, vy, vz, fd);
-    screen.compute_rays();
-    let r00 = screen.at_pixel(0,0);
-    println!("ray00: {}",r00);
-    println!("center: {}",screen.at_pixel(50,50));
-    
-    
-    let total = width * height;
-	println!("total: {}", total);
-	let mut pixels:Vec<Color> =Vec::new();
-	for t in range(0, total){
-	    pixels.push(Color{r:255,g:255,b:255});
-	}
-    
-    let mut cnt = 0;
-    for iy in range(0, height){
-		for jx in range(0,width){
-			let pixel_vector = screen.at_pixel(jx, iy);
-			//println!("pixel vector: {}",pixel_vector);
-			let pixel_ray = Ray::new(xorig, yorig, zorig, pixel_vector, lod);
-			let mut length = 0;
-			let index = iy * width + jx;
-			println!("index: {} cnt: {}", index,cnt);
-			loop {
-				let point = pixel_ray.at_length(length);
-				//println!("point: {}", point);
-				let hit = voxelizer.hit_optimize(point.x, point.y, point.z);
-				if hit {
-					pixels[index as usize] = Color{r:0,g:0,b:0};
-					break;
-				}
-				if length >= max_distance {
-					//pixels[index as usize] = Color{r:255,g:255,b:255};
-					break;
-				}
-				length += 1;
-			}
-			cnt += 1;
-		}
-    }
-    
-    save_to_file(pixels, width, height);
-}
 
 
 
-fn save_to_file(pixels:Vec<Color>, width:i64, height:i64){
 
-	let mut file = File::create(&Path::new("pic.ppm"));
+pub fn save_to_file(filename:String, pixels:Vec<Color>, width:i64, height:i64){
+
+	let mut file = File::create(&Path::new(filename));
 	let header = String::from_str(format!("P6\n# CREATOR: lee\n").as_slice());
 	file.write(header.into_bytes().as_slice());
 

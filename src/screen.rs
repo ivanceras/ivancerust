@@ -58,7 +58,7 @@ impl Screen{
                 let (ys, yc, ps, pc) = (total_yaw.sin(), total_yaw.cos(), total_pitch.sin(), total_pitch.cos());
                 let new_x = ys * pc;
                 let new_y = ps;
-                let new_z = ys * pc;
+                let new_z = yc * pc;
                 let distance = Vector::new(new_x, new_y, new_z).distance();
             }
         }
