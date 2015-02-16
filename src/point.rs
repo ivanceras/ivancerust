@@ -13,3 +13,7 @@ impl fmt::String for Point {
         write!(f, "({}, {}, {})", self.x, self.y, self.z)
     }
 }
+
+impl Clone for Point {
+    fn clone(&self) -> Point { Point{x:self.x, y:self.y, z:self.z} }
+}

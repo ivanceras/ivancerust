@@ -7,7 +7,7 @@ use vector::Vector;
 use point::Point;
 use screen::Screen;
 use color::Color;
-use morton::morton;
+use morton::{morton, morton_decode};
 
 use std::old_io::File;
 
@@ -90,28 +90,14 @@ impl Voxelizer{
             for k in range (0, self.zlimit){
                   self.actual_total += 1;
                   //sign matters here
-                  let x = (i as i64 - self.cx) as f64;
-                  let y = (j as i64 - self.cy) as f64;
-                  let z = (k as i64 - self.cz) as f64;
-                  let iijjkk:f64 = x*x + y*y + z*z ;
-                  let sqrt_iijjkk:f64 = (iijjkk).sqrt();
-                  let rounded_sqrt_ijk = (sqrt_iijjkk.round()) as u64;
-                  
-                  let index = i * self.ylimit * self.zlimit + j * self.zlimit + k;
-                  let m = morton(i, j, k, self.lod);
-                  assert!(index == self.counter);
-                  
-                  if rounded_sqrt_ijk == self.r {
-                    self.inside += 1;
-                    self.inline += 1;
-                    self.voxel.set_bit_at_loc(i, j, k, true);
-                    //println!("inside: {}, {}, {} morton: {}",i,j,k, m);
-                  }
-                  
-                  else if sqrt_iijjkk < self.r as f64 {
-                    self.inside += 1;
-                    self.voxel.set_bit_at_loc(i, j, k, true);
-                    //println!("inside: {}, {}, {} morton: {}",i,j,k, m);
+                  let x = (i as i64 - self.cx);
+                  let y = (j as i64 - self.cy);
+                  let z = (k as i64 - self.cz);
+                  if self.is_inside_cube(x, y, z){
+		              let index = i * self.ylimit * self.zlimit + j * self.zlimit + k;
+		              let m = morton(i, j, k, self.lod);
+		              self.voxel.set_bit_at_loc(i, j, k, true);
+		              self.inside += 1;
                   }
                   else {
                     self.outside += 1;
@@ -122,7 +108,28 @@ impl Voxelizer{
         }
     }
     
-    
+    //is inside sphere
+	fn is_inside_sphere(&self, x:i64, y:i64,z:i64)->bool{
+		let xf = x as f64;
+		let yf = y as f64;
+		let zf = z as f64;
+		let rad = (xf*xf + yf*yf + zf*zf).sqrt().round() as u64;
+		if rad <= self.r {
+			return true;
+		}
+		false
+	}
+	
+	//is inside cube, r is the half the length of side
+	fn is_inside_cube(&self, x:i64, y:i64,z:i64)->bool{
+		let len = self.r as i64;
+		if x >= -len && x <= len
+		  && y >= -len && y <= len
+		  && z >= -len && z <= len {
+			return true;
+		}
+		false
+	}
     
     fn debug(&self){
         println!("lod: {}", self.lod);
@@ -251,12 +258,13 @@ pub fn save_to_file(filename:String, pixels:Vec<Color>, width:i64, height:i64){
 
 	let size = String::from_str(format!("{} {}\n255\n", width, height).as_slice());
 	file.write(size.into_bytes().as_slice());
-
+	let mut buffer = Vec::new();
 	for p in range(0,pixels.len()){
-		file.write_u8(pixels[p].r);
-		file.write_u8(pixels[p].g);
-		file.write_u8(pixels[p].b);
+		buffer.push(pixels[p].r);
+		buffer.push(pixels[p].g);
+		buffer.push(pixels[p].b);
 	}
+	file.write_all(buffer.as_slice());
 }
 
 #[test]

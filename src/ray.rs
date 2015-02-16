@@ -15,16 +15,10 @@ pub struct Ray{
 
 impl Ray{
 
-	pub fn new(xorig:i64, yorig:i64, zorig:i64, dir:Vector, lod:u8)->Ray{
-		let orig = Point{x:xorig, y:yorig, z:zorig};
-		let limit:u64 = 1 << lod;
-		let xlimit = limit;
-        let ylimit = limit;
-        let zlimit = limit;
-		//println!("calc_total {}", (zlimit * ylimit * zlimit));
+	pub fn new(origin:Point, pointing:Vector, lod:u8)->Ray{
+		let dir = pointing.minus(origin.clone());
 		let unit_dir = dir.unit_vector();
-		//println!("unit vector: {}",unit_dir);
-		Ray{orig:orig, dir:dir, unit_dir: unit_dir, lod:lod}
+		Ray{orig:origin, dir:dir, unit_dir: unit_dir, lod:lod}
 		
 	}
 	
@@ -34,17 +28,14 @@ impl Ray{
 		let ylen = self.unit_dir.y * length as f64;
 		let zlen = self.unit_dir.z * length as f64;
 		
-		//println!("len: {}, {}, {}",xlen, ylen, zlen);
 		let xround = xlen.round() as i64;
 		let yround = ylen.round() as i64;
 		let zround = zlen.round() as i64;
-		//println!("rounded: {}, {}, {}",xround, yround, zround);
 		
 		let xloc = self.orig.x + xround;
 		let yloc = self.orig.y + yround;
 		let zloc = self.orig.z + zround;
 
-		//println!("loc: {}, {}, {}",xloc, yloc, zloc);
 		Point{x:xloc, y:yloc, z:zloc}
 
 	}
