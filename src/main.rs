@@ -1,4 +1,5 @@
 extern crate time;
+extern crate glutin;
 
 use std::num::Float;
 use std::collections::BTreeSet;
@@ -27,7 +28,7 @@ mod morton;
 mod voxelizer;
 
 fn main(){
-	let lod:u8 = 6;
+	let lod:u8 = 8;
     let limit:u64 = 1 << lod;
     let r:u64 = 1 << lod-1;//do a radius of half the limit
     let mut voxelizer = Voxelizer::new(lod, limit, r);
@@ -57,7 +58,7 @@ fn main(){
 
     let xcam = -(limit) as i64;
     let ycam = -(limit) as i64;
-    let zcam = -2 * (limit) as i64;
+    let zcam = -(limit) as i64;
     
     let camera = Point{x:xcam, y:ycam, z:zcam};
     let lookat = Point{x:xlookat, y:ylookat, z:zlookat};
@@ -76,7 +77,7 @@ fn main(){
     
 	let mut pixels:Vec<Color> =Vec::new();
 	for t in range(0, total){
-	    pixels.push(Color{r:0,g:0,b:0});
+	    pixels.push(Color{r:255,g:255,b:255});
 	}
     
     //transform the direction here

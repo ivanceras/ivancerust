@@ -47,9 +47,9 @@ impl Voxel{
         if bitset_index < 0 {
             self.indexes.push(byte_index);
             self.bitset.push(0);
-            let r = 255 - ((x as f64 / self.limit as f64) * 255.0).round() as u8;
-            let g = 255 - ((y as f64 / self.limit as f64) * 255.0).round() as u8;
-            let b = 255 - ((z as f64 / self.limit as f64) * 255.0).round() as u8;
+            let r = 256 - ((x as f64 / self.limit as f64) * 256.0).round() as u8;
+            let g = 256 - ((y as f64 / self.limit as f64) * 256.0).round() as u8;
+            let b = 256 - ((z as f64 / self.limit as f64) * 256.0).round() as u8;
             self.colors.push(Color{r:r, g:g, b:b});
             bitset_index = self.index_of(byte_index);
         }

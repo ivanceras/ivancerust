@@ -14,8 +14,8 @@ impl Screen{
     
     pub fn new(width:i64, height:i64,fd:i64, lod:u8)->Screen{
         let limit = 1 << lod;
-        let multiplier = limit as f64/ width as f64;
-        //let multiplier = 1.0;
+        //let multiplier = limit as f64/ width as f64;
+        let multiplier = 1.0;
         println!("multiplier: {}", multiplier);
         Screen{width:width, height:height, fd:fd, multiplier:multiplier}
     }

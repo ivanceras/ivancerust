@@ -6,3 +6,7 @@ authors = ["ivan ceras <ivanceras@gmail.com>"]
 
 [dependencies.time]
 git = "https://github.com/rust-lang/time"
+
+
+[dependencies.glutin]
+git = "https://github.com/tomaka/glutin"
