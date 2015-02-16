@@ -62,33 +62,18 @@ impl Vector{
     
     //http://stackoverflow.com/questions/13275719/rotate-a-3d-point-around-another-one
     //http://stackoverflow.com/questions/16380147/how-to-rotate-an-object-defined-by-x-y-z-points-around-the-x-y-or-z-axis
-    // If you rotate along z, [z' = z]
-	// x' = x*cos a - y*sin a;
-	// y' = x*sin a + y*cos a; 
     pub fn rotate_at_z(&self, a:f64)->Vector{
     	let x = self.x * a.cos() - self.y * a.sin();
 		let y = self.x * a.sin() + self.y * a.cos();
 		let z = self.z;  
 		Vector::new(x,y,z)
     }
-    //The same repeated for y-axis: [y'' = y']
-	//x'' = x'*cos b - z' * sin b;
-	//z'' = z'*sin b + x' * cos b;  
-    /*pub fn rotate_at_y(&self, b:f64)->Vector{
-		let x = self.x * b.cos() - self.z * b.sin();
-		let z = self.z * b.sin() + self.x * b.cos();  
-		let y = self.y;
-		Vector::new(x,y,z)
-    }*/
      pub fn rotate_at_y(&self, b:f64)->Vector{
 		let z = self.z * b.cos() - self.x * b.sin();  
 		let x = self.z * b.sin() + self.x * b.cos();
 		let y = self.y;
 		Vector::new(x,y,z)
     }
-    //Again rotating along x-axis: [x''' = x'']
-    //y''' = y'' * cos c - z'' * sin c
-	//z''' = z'' * sin c + y'' * cos c
     pub fn rotate_at_x(&self, c:f64)->Vector{
     	let y = self.y * c.cos() - self.z * c.sin();
 		let z = self.y * c.sin() + self.z * c.cos();

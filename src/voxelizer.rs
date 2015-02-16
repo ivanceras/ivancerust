@@ -81,31 +81,31 @@ impl Voxelizer{
     
     pub fn start(&mut self){
         for i in range (0, self.xlimit){
-        let new_percentage = ((i as f64/self.xlimit as f64) * 100.0).round() as u64;
-        if new_percentage != self.percentage {
-            println!("{} %", self.percentage);
-        }
-        self.percentage = new_percentage;
-        for j in range (0, self.ylimit) {
-            for k in range (0, self.zlimit){
-                  self.actual_total += 1;
-                  //sign matters here
-                  let x = (i as i64 - self.cx);
-                  let y = (j as i64 - self.cy);
-                  let z = (k as i64 - self.cz);
-                  if self.is_inside_cube(x, y, z){
-		              let index = i * self.ylimit * self.zlimit + j * self.zlimit + k;
-		              let m = morton(i, j, k, self.lod);
-		              self.voxel.set_bit_at_loc(i, j, k, true);
-		              self.inside += 1;
+            let new_percentage = ((i as f64/self.xlimit as f64) * 100.0).round() as u64;
+            if new_percentage != self.percentage {
+                println!("{} %", self.percentage);
+            }
+            self.percentage = new_percentage;
+            for j in range (0, self.ylimit) {
+                for k in range (0, self.zlimit){
+                      self.actual_total += 1;
+                      //sign matters here
+                      let x = (i as i64 - self.cx);
+                      let y = (j as i64 - self.cy);
+                      let z = (k as i64 - self.cz);
+                      if self.is_inside_cube(x, y, z){
+		                  let index = i * self.ylimit * self.zlimit + j * self.zlimit + k;
+		                  let m = morton(i, j, k, self.lod);
+		                  self.voxel.set_bit_at_loc(i, j, k, true);
+		                  self.inside += 1;
+                      }
+                      else {
+                        self.outside += 1;
+                      }
+                      self.counter += 1;
                   }
-                  else {
-                    self.outside += 1;
-                  }
-                  self.counter += 1;
-              }
-           }    
-        }
+               }    
+            }
     }
     
     //is inside sphere

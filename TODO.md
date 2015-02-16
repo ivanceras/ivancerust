@@ -2,11 +2,11 @@
 
 ~~implement a screen ray vectors aligned with the voxel in subject orientation~~
 
-cargofy the project
+~~cargofy the project~~
 
 Save voxelized voxel octree into a file to save computation time of on the spot objects.
 
-Add colors and normals to the voxel array
+~~Add colors~~ and normals to the voxel array
 
 
 Use quarternions on camera rotations

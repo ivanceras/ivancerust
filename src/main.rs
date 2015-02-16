@@ -27,7 +27,7 @@ mod morton;
 mod voxelizer;
 
 fn main(){
-	let lod:u8 = 7;
+	let lod:u8 = 6;
     let limit:u64 = 1 << lod;
     let r:u64 = 1 << lod-1;//do a radius of half the limit
     let mut voxelizer = Voxelizer::new(lod, limit, r);
@@ -44,13 +44,6 @@ fn main(){
     println!("Displaying voxels at all levels..");
     let levels = voxelizer.lod_voxels.len();
     println!("levels: {}", levels);
-    /*
-    for lev in range (0, levels){
-    	let actual_lod = lod - (lev+1) as u8;
-    	println!("at actual lod: {}",actual_lod);
-    	println!("{}",voxelizer.lod_voxels[lev]);
-    }
-    */
     
     //look at the center of the sphere
     let xlookat = (limit/2) as i64;
@@ -60,11 +53,11 @@ fn main(){
 	//put the camera away from sphere in z direction, slightly up and slightly right
     let xcam = (limit/2) as i64;
     let ycam = (limit/2) as i64;
-    let zcam = -1 * (limit) as i64;
+    let zcam = -3 * (limit) as i64;
 
-    //let xcam = (0) as i64;
-    //let ycam = (0) as i64;
-    //let zcam = -(limit) as i64;
+    let xcam = -(limit) as i64;
+    let ycam = -(limit) as i64;
+    let zcam = -2 * (limit) as i64;
     
     let camera = Point{x:xcam, y:ycam, z:zcam};
     let lookat = Point{x:xlookat, y:ylookat, z:zlookat};
@@ -109,7 +102,7 @@ fn main(){
 	        let t1:Timespec = get_time();
 			let mut pixel_screen:Vector = screen.at_pixel(jx, iy);//direction of pixel relative to the screen facing forward
 			let rotated_pixel_screen = pixel_screen.rotate_at_y(yaw);
-			let rotated_at_pitch = rotated_pixel_screen.rotate_at_x(pitch);
+			let rotated_at_pitch = rotated_pixel_screen.rotate_at_x(-pitch);
 			let final_location = rotated_at_pitch.add_vector(pixel_screen.clone()).add(camera.clone());
 			let pixel_screen_camera = rotated_at_pitch.add(camera.clone());//the most correct when no rotation
 			
