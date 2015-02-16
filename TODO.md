@@ -1,4 +1,4 @@
-//TODO:
+##TODO:
 
 ~~implement a screen ray vectors aligned with the voxel in subject orientation~~
 
@@ -20,3 +20,4 @@ Use quarternions on camera rotations
 Arrays of 8bits or arrays of 64bits.
 Each voxel can be contained either by 64bits or 8bits. A long list of 8bits or 1/8th less of 64bits.
 
+Use opengl instead of ppm files to render the pixels
