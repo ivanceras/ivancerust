@@ -39,8 +39,7 @@ impl Voxel{
 	    
     }
     
-    //TODO need to set an unset, bit and color as well, colors should have its own storage per bits, not per 8bits
-    pub fn set_bit_at_loc(&mut self, x:u64, y:u64, z:u64, val:bool, color:Color){
+      pub fn set_bit_at_loc(&mut self, x:u64, y:u64, z:u64, val:bool, color:Color){
         let bit_index = morton(x,y,z,self.lod);
 	    let byte_index = (bit_index / 8) as u64;
         let remainder = bit_index % 8;
@@ -48,7 +47,10 @@ impl Voxel{
         if bitset_index < 0 {
             self.indexes.push(byte_index);
             self.bitset.push(0);
-            self.colors.push(color);
+            let r = 256 - ((x as f64 / self.limit as f64) * 256.0).round() as u8;
+            let g = 256 - ((y as f64 / self.limit as f64) * 256.0).round() as u8;
+            let b = 256 - ((z as f64 / self.limit as f64) * 256.0).round() as u8;
+            self.colors.push(Color{r:r, g:g, b:b});
             bitset_index = self.index_of(byte_index);
         }
         let byte = self.bitset[bitset_index as usize];
@@ -56,12 +58,6 @@ impl Voxel{
             let or_byte = 1 << remainder;
             let new_byte = byte | or_byte;
             self.bitset[bitset_index as usize] = new_byte;
-        }
-        else{
-        	let tmp_byte:u8 = 1 << remainder;
-        	let and_byte:u8 = !tmp_byte;//flip the bits
-        	let new_byte = byte & and_byte;
-        	self.bitset[bitset_index as usize] = new_byte;
         }
 	    
     }

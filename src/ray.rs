@@ -1,6 +1,5 @@
 //ray.rs
 
-use voxel::Voxel;
 use vector::Vector;
 use std::num::Float;
 use point::Point;

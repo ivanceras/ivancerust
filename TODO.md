@@ -20,3 +20,8 @@ Use quarternions on camera rotations
 Arrays of 8bits or arrays of 64bits.
 Each voxel can be contained either by 64bits or 8bits. A long list of 8bits or 1/8th less of 64bits.
 
+
+Feb 18:
+
+* Voxel colors should have its own array of colors for each indexes
+* and so with the normals

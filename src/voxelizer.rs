@@ -1,6 +1,7 @@
 use std::num::Float;
 use std::collections::BTreeSet;
 
+//use indexed_voxel::Voxel;
 use voxel::Voxel;
 use ray::Ray;
 use vector::Vector;
@@ -96,7 +97,12 @@ impl Voxelizer{
                       if self.is_inside_cube(x, y, z){
 		                  let index = i * self.ylimit * self.zlimit + j * self.zlimit + k;
 		                  let m = morton(i, j, k, self.lod);
-		                  self.voxel.set_bit_at_loc(i, j, k, true);
+		                  let r = 256 - ((i as f64 / self.limit as f64) * 256.0).round() as u8;
+						  let g = 256 - ((j as f64 / self.limit as f64) * 256.0).round() as u8;
+						  let b = 256 - ((k as f64 / self.limit as f64) * 256.0).round() as u8;
+		                  let color = Color{r:r,g:g,b:b};
+		                  self.voxel.set_bit_at_loc(i, j, k, true, color);
+		                  
 		                  self.inside += 1;
                       }
                       else {
@@ -162,7 +168,6 @@ impl Voxelizer{
     fn hit_direct(&self, x:i64, y:i64, z:i64)->bool{
     	let bounded = self.bounded(x, y, z);
     	if !bounded {
-    		//println!("{} {} {} not bounded..",x, y, z);
     		return false;
     	}
     	let m = morton(x as u64, y as u64, z as u64, self.lod);
@@ -174,18 +179,12 @@ impl Voxelizer{
      fn hit_at_lod(&self, x:i64, y:i64, z:i64, lod:u8)->bool{
      	let bounded = self.bounded(x, y, z);
      	if !bounded {
-    		//println!("{} {} {} not bounded..",x, y, z);
     		return false;
     	}
     	let (xlod, ylod, zlod) = self.at_lod(x, y, z, lod);
     	let index = self.lod - (lod+1);
-    	//println!("index: {}", index);
     	let m = morton(xlod as u64, ylod as u64, zlod as u64, lod);
-    	//println!("{},{},{} ",x,y,z);
-    	//println!("{},{},{} morton: {}",xlod, ylod, zlod, m);
-    	//println!("voxels: \n {}", self.lod_voxels[index as usize]);
     	let isset = self.lod_voxels[index as usize].isset(m);
-    	//println!("isset: {}", isset);
     	isset
     }
     
@@ -197,16 +196,14 @@ impl Voxelizer{
     		if !hit {
     			return false;
     		}
-    		if hit {
+    		else {
     			hit_counter += 1;
     		}
     	}
-    	//println!("hit counter: {}", hit_counter);
     	if hit_counter == self.lod -1 {
-    		//println!("all lower LOD are hit.. trying the highest detail..");
     		return self.hit_direct(x,y,z);
     	}
-    	true
+    	false
     }
     
     pub fn get_color(&self, x:i64, y:i64, z:i64)->Color{
@@ -216,13 +213,11 @@ impl Voxelizer{
     
     //get the x,y,z at given lod
     fn at_lod(&self, x:i64, y:i64, z:i64, new_lod:u8)->(i64, i64, i64){
-    	//println!("current lod: {} --> {}", self.lod, new_lod);
     	let limit = 1 << self.lod;
     	let new_limit = 1 << new_lod;
     	let xnew = (x as f64 * new_limit as f64 / limit as f64).round() as i64;
     	let ynew = (y as f64 * new_limit as f64 / limit as f64).round() as i64;
     	let znew = (z as f64 * new_limit as f64 / limit as f64).round() as i64;
-    	//println!("new {},{},{}",xnew, ynew, znew);
     	(xnew, ynew, znew)
     }
     
@@ -230,12 +225,29 @@ impl Voxelizer{
     pub fn build_voxel_lod(&mut self){
     	 let mut parent_voxel = self.voxel.clone();
     	 for i in range(0, self.lod){
-    	 	//println!("Building voxel at LOD: {}", i);
+    	 	println!("Building voxel at LOD: {}", i);
     		parent_voxel = parent_voxel.parent();
-    		//parent_voxel.display_bitset();
+    		//println!("voxels: {}", parent_voxel);
     		self.lod_voxels.push(parent_voxel.clone());
     		
     	}
+    }
+    
+    //trace the voxels at pixel_ray direction, marching the distance up to max_distance
+    pub fn trace(&self, pixel_ray:Ray, max_distance:u64)->Color{
+        let mut length = 0;
+        loop {
+            let point = pixel_ray.at_length(length);
+            let hit = self.hit_optimize(point.x, point.y, point.z);
+            //let hit = self.hit_direct(point.x, point.y, point.z);
+            if hit {
+                return self.get_color(point.x, point.y, point.z)
+            }
+            if length >= max_distance {
+                return Color{r:255,g:255,b:255};
+            }
+            length += 1;
+        }
     }
     
     
