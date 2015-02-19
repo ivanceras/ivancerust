@@ -111,6 +111,7 @@ impl Voxel{
     
     
     //check to see if bit is set or not
+    /*
     pub fn isset(&self, bit_index:u64)->bool{
     	let byte_index = (bit_index / 8) as u64;
         let remainder = bit_index % 8;
@@ -125,13 +126,21 @@ impl Voxel{
         }
     	false
     }
+    */
     
+    pub fn isset(&self, bit_index:u64)->bool{
+		let color_index = self.index_of_color(bit_index);
+		if color_index < 0 {
+			return false
+		}
+		true
+	}
     
     
     pub fn get_color(&self, bit_index:u64)->Color{
         let color_index = self.index_of_color(bit_index);
         if color_index < 0 {
-        	return Color{r:0,g:0,b:0};
+        	return Color::new(0,0,0,255);
         }
         self.colors[color_index as usize].clone()
     }
@@ -166,28 +175,6 @@ impl Voxel{
 	    parent_bitset
     }
     
-    /*
-    pub fn parent(&self)->Voxel{
-	    println!("Getting the parent bitset...");
-	    let len = self.indexes.len();
-	    let new_lod = self.lod - 1;
-	    let mut parent_bitset = Voxel::new(new_lod);
-	    for i in range (0, len) {
-	        let bitset_index = self.indexes[i];//get the bitset_index, recompute the new bit_set_index when lod = lod -1
-		    let byte = self.bitset[i];
-	        let (x,y,z) = morton::decode(bitset_index, self.lod);
-	        let (new_x, new_y, new_z) = self.at_lod(x as i64, y as i64, z as i64, new_lod);
-	        //let new_morton = morton::encode(new_x as u64, new_y as u64, new_z as u64, self.lod);
-	        let new_morton = morton::encode(new_x as u64, new_y as u64, new_z as u64, new_lod);
-	        println!("xyz:{},{},{} new_xyz:{},{},{}  bitset:{},  new_morton: {}",x,y,z,new_x,new_y,new_z,bitset_index, new_morton);
-		    //if byte > 0 {
-			    //parent_bitset.set_bit(bitset_index, true);
-			    parent_bitset.set_bit(new_morton, true);
-		    //}
-	    }
-	    parent_bitset
-    }
-    */
     
     
     pub fn clone(&self)->Voxel{

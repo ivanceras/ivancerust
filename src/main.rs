@@ -34,8 +34,8 @@ mod voxelizer;
 fn main(){
 	let use_threads = false;
 	//let file_pre = "./sphere/color";//sphere
-	let file_pre = "./front";//cubes
-	let lod:u8 = 5;//lod of the object when voxelizing
+	let file_pre = "./angled/cube";//cubes
+	let lod:u8 = 7;//lod of the object when voxelizing
     let limit:u64 = 1 << lod;
 
 	let view_lod = 8;//base LOD at screen 1 voxel = 1 pixel
@@ -66,9 +66,9 @@ fn main(){
     let ycam = -(limit) as i64;
     let zcam = -(limit) as i64;
     
-    let xcam = (limit/2) as i64;
-    let ycam = (limit/2) as i64;
-    let zcam = -(limit) as i64;
+    //let xcam = (limit/2) as i64;
+    //let ycam = (limit/2) as i64;
+    //let zcam = -(limit) as i64;
     
     let camera = Point{x:xcam, y:ycam, z:zcam};
     let lookat = Point{x:xlookat, y:ylookat, z:zlookat};
@@ -88,7 +88,7 @@ fn main(){
     
 	let mut pixels:Vec<Color> =Vec::new();
 	for t in range(0, total){
-	    pixels.push(Color{r:255,g:255,b:255});//white background
+	    pixels.push(Color::new(255,255,255,255));//white background
 	}
     
     //transform the direction here

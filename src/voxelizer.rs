@@ -42,8 +42,8 @@ impl Voxelizer{
         let cy = (ylimit/2) as i64;
         let cz = (zlimit/2) as i64;
         
+        let mut percentage = 0;
         for i in range (0, xlimit){
-        	let mut percentage = 0;
             let new_percentage = ((i as f64/xlimit as f64) * 100.0).round() as u64;
             if new_percentage != percentage {
                 println!("{} %", percentage);
@@ -55,13 +55,13 @@ impl Voxelizer{
                       let x = (i as i64 - cx);
                       let y = (j as i64 - cy);
                       let z = (k as i64 - cz);
-                      if self.is_inside_sphere(x, y, z){
+                      if self.is_inside_cube(x, y, z){
 		                  let index = i * ylimit * zlimit + j * zlimit + k;
 		                  let m = morton::encode(i, j, k, self.lod);
 		                  let r = 256 - ((i as f64 / self.limit as f64) * 256.0).round() as u8;
 						  let g = 256 - ((j as f64 / self.limit as f64) * 256.0).round() as u8;
 						  let b = 256 - ((k as f64 / self.limit as f64) * 256.0).round() as u8;
-		                  let color = Color{r:r,g:g,b:b};
+		                  let color = Color::new(r,g,b,255);
 		                  self.voxel.set_bit_at_loc(i, j, k, true, color);
                       }
                   }
@@ -190,13 +190,13 @@ impl Voxelizer{
         let mut length = 0;
         loop {
             let point = pixel_ray.at_length(length);
-            let hit = self.hit_optimize(point.x, point.y, point.z);
-            //let hit = self.hit_direct(point.x, point.y, point.z);
+            //let hit = self.hit_optimize(point.x, point.y, point.z);
+            let hit = self.hit_direct(point.x, point.y, point.z);
             if hit {
                 return self.get_color(point.x, point.y, point.z)
             }
             if length >= max_distance {
-                return Color{r:255,g:255,b:255};
+                return Color::new(255,255,255,255);
             }
             length += 1;
         }
@@ -206,14 +206,6 @@ impl Voxelizer{
  }  
 
  
-
-
- 
-
-
-
-
-
 pub fn save_to_file(filename:String, pixels:Vec<Color>, width:i64, height:i64){
 
 	let mut file = File::create(&Path::new(filename));
