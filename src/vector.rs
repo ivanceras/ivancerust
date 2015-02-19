@@ -33,7 +33,7 @@ impl Vector{
 		let z = self.z - point.z as f64;
 		Vector::new(x,y,z)
 	}
-	pub fn add(&self, point:Point)->Vector{
+	pub fn add(&self, point:&Point)->Vector{
 		let x = self.x + point.x as f64;
 		let y = self.y + point.y as f64;
 		let z = self.z + point.z as f64;

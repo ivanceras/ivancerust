@@ -14,10 +14,10 @@ pub struct Ray{
 
 impl Ray{
 
-	pub fn new(origin:Point, pointing:Vector, lod:u8)->Ray{
+	pub fn new(origin:&Point, pointing:Vector, lod:u8)->Ray{
 		let dir = pointing.minus(origin.clone());
 		let unit_dir = dir.unit_vector();
-		Ray{orig:origin, dir:dir, unit_dir: unit_dir, lod:lod}
+		Ray{orig:origin.clone(), dir:dir, unit_dir: unit_dir, lod:lod}
 		
 	}
 	

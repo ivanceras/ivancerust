@@ -1,14 +1,14 @@
 use std::num::Float;
 use std::collections::BTreeSet;
 
-//use indexed_voxel::Voxel;
 use voxel::Voxel;
 use ray::Ray;
 use vector::Vector;
 use point::Point;
 use screen::Screen;
 use color::Color;
-use morton::{morton, morton_decode};
+use morton;
+use std::thread::Thread;
 
 use std::old_io::File;
 
@@ -16,99 +16,54 @@ pub struct Voxelizer{
 	lod:u8,
     limit:u64,
     r:u64,
-    
-    xlimit:u64,
-    ylimit:u64,
-    zlimit:u64,
-    
-    cx:i64,
-    cy:i64,
-    cz:i64,
-    
-    inside:u64,
-    outside:u64,
-    actual_total:u64,
-    percentage:u64,
-    inline:u64,
-    counter:u64,
-    
     voxel:Voxel, //the highest resolution voxel
-    
-    lod_list:Vec<u8>, //level of detail for each voxel
-	pub lod_voxels:Vec<Voxel>, //voxels with the LOD
+	lod_voxels:Vec<Voxel>, //voxels with the LOD
 }
 
 impl Voxelizer{
 
     pub fn new(lod:u8, limit:u64, r:u64)->Voxelizer{
-        let mut voxel = Voxel::new(lod);
-        
-        let xlimit = limit;
-        let ylimit = limit;
-        let zlimit = limit;
-        
-        let cx = (xlimit/2) as i64;
-        let cy = (ylimit/2) as i64;
-        let cz = (zlimit/2) as i64;
-        
         Voxelizer{
-        
             lod:lod, 
             limit:limit, 
             r:r, 
-            
-            xlimit:xlimit,
-            ylimit:ylimit,
-            zlimit:zlimit,
-
-            cx:cx,
-            cy:cy,
-            cz:cz,
-            
-            inside:0,
-            outside:0,
-            actual_total:0,
-            percentage:0,   
-            inline:0,
-            counter:0,
-            
-            voxel:voxel,
-            
-            lod_list:Vec::new(),
+            voxel:Voxel::new(lod),
             lod_voxels:Vec::new()
             
           }
     }
     
     pub fn start(&mut self){
-        for i in range (0, self.xlimit){
-            let new_percentage = ((i as f64/self.xlimit as f64) * 100.0).round() as u64;
-            if new_percentage != self.percentage {
-                println!("{} %", self.percentage);
+    	let xlimit = self.limit;
+        let ylimit = self.limit;
+        let zlimit = self.limit;
+        
+        let cx = (xlimit/2) as i64;
+        let cy = (ylimit/2) as i64;
+        let cz = (zlimit/2) as i64;
+        
+        for i in range (0, xlimit){
+        	let mut percentage = 0;
+            let new_percentage = ((i as f64/xlimit as f64) * 100.0).round() as u64;
+            if new_percentage != percentage {
+                println!("{} %", percentage);
             }
-            self.percentage = new_percentage;
-            for j in range (0, self.ylimit) {
-                for k in range (0, self.zlimit){
-                      self.actual_total += 1;
+            percentage = new_percentage;
+            for j in range (0, ylimit) {
+                for k in range (0, zlimit){
                       //sign matters here
-                      let x = (i as i64 - self.cx);
-                      let y = (j as i64 - self.cy);
-                      let z = (k as i64 - self.cz);
-                      if self.is_inside_cube(x, y, z){
-		                  let index = i * self.ylimit * self.zlimit + j * self.zlimit + k;
-		                  let m = morton(i, j, k, self.lod);
+                      let x = (i as i64 - cx);
+                      let y = (j as i64 - cy);
+                      let z = (k as i64 - cz);
+                      if self.is_inside_sphere(x, y, z){
+		                  let index = i * ylimit * zlimit + j * zlimit + k;
+		                  let m = morton::encode(i, j, k, self.lod);
 		                  let r = 256 - ((i as f64 / self.limit as f64) * 256.0).round() as u8;
 						  let g = 256 - ((j as f64 / self.limit as f64) * 256.0).round() as u8;
 						  let b = 256 - ((k as f64 / self.limit as f64) * 256.0).round() as u8;
 		                  let color = Color{r:r,g:g,b:b};
 		                  self.voxel.set_bit_at_loc(i, j, k, true, color);
-		                  
-		                  self.inside += 1;
                       }
-                      else {
-                        self.outside += 1;
-                      }
-                      self.counter += 1;
                   }
                }    
             }
@@ -137,25 +92,15 @@ impl Voxelizer{
 		false
 	}
     
-    fn debug(&self){
-        println!("lod: {}", self.lod);
-        println!("limit: {}", self.limit);
-        println!("radius: {}", self.r);
-        println!("inside: {}", self.inside);
-        println!("outside: {}", self.outside);
-        println!("inline: {}", self.inline);
-        println!("actual_total: {} or {}", self.actual_total, self.inside+self.outside);
-    }
-    
     
      //determines if the point is inside the boundary of this voxel
     fn bounded(&self, x:i64, y:i64, z:i64)->bool{
     	let xlowerbound = 0;
     	let ylowerbound = 0;
     	let zlowerbound = 0;
- 		let xupperbound = self.xlimit as i64;
- 		let yupperbound = self.ylimit as i64;
- 		let zupperbound = self.zlimit as i64;
+ 		let xupperbound = self.limit as i64;
+ 		let yupperbound = self.limit as i64;
+ 		let zupperbound = self.limit as i64;
  		if x < xlowerbound || y < ylowerbound || z < zlowerbound 
  		|| x > xupperbound || y > yupperbound || z > zupperbound
  		{
@@ -170,7 +115,7 @@ impl Voxelizer{
     	if !bounded {
     		return false;
     	}
-    	let m = morton(x as u64, y as u64, z as u64, self.lod);
+    	let m = morton::encode(x as u64, y as u64, z as u64, self.lod);
     	let isset = self.voxel.isset(m);
     	isset
     }
@@ -182,17 +127,18 @@ impl Voxelizer{
     		return false;
     	}
     	let (xlod, ylod, zlod) = self.at_lod(x, y, z, lod);
-    	let index = self.lod - (lod+1);
-    	let m = morton(xlod as u64, ylod as u64, zlod as u64, lod);
-    	let isset = self.lod_voxels[index as usize].isset(m);
+    	//let index = self.lod - (lod+1);
+    	let m = morton::encode(xlod as u64, ylod as u64, zlod as u64, lod);
+    	//println!("lod: {}, self.lod_voxels.len(): {}, index: {}",lod, self.lod_voxels.len(), index);
+    	let isset = self.lod_voxels[lod as usize].isset(m);
     	isset
     }
     
     //recursively checks at low LOD first if it hits, proceeds to the highest detail if all lowe level LOD's are hit
     pub fn hit_optimize(&self, x:i64, y:i64, z:i64)->bool{
     	let mut hit_counter = 0;
-    	for detail in range(1, self.lod){
-    		let hit = self.hit_at_lod(x, y, z, detail);
+    	for detail in range(1, self.lod){//1 to 4
+    		let hit = self.hit_at_lod(x, y, z, detail);//detail is the index of the LOD list, 1 is the lowest LOD
     		if !hit {
     			return false;
     		}
@@ -207,7 +153,7 @@ impl Voxelizer{
     }
     
     pub fn get_color(&self, x:i64, y:i64, z:i64)->Color{
-        let m = morton(x as u64, y as u64, z as u64, self.lod);
+        let m = morton::encode(x as u64, y as u64, z as u64, self.lod);
         self.voxel.get_color(m)
     }
     
@@ -218,6 +164,7 @@ impl Voxelizer{
     	let xnew = (x as f64 * new_limit as f64 / limit as f64).round() as i64;
     	let ynew = (y as f64 * new_limit as f64 / limit as f64).round() as i64;
     	let znew = (z as f64 * new_limit as f64 / limit as f64).round() as i64;
+    	//println!("at lod {}: {},{},{}", new_lod, xnew, ynew, znew);
     	(xnew, ynew, znew)
     }
     
@@ -225,10 +172,15 @@ impl Voxelizer{
     pub fn build_voxel_lod(&mut self){
     	 let mut parent_voxel = self.voxel.clone();
     	 for i in range(0, self.lod){
+    		self.lod_voxels.push(Voxel::new(i+1));
+    		
+    	}
+    	 for i in range(0, self.lod){
     	 	println!("Building voxel at LOD: {}", i);
     		parent_voxel = parent_voxel.parent();
     		//println!("voxels: {}", parent_voxel);
-    		self.lod_voxels.push(parent_voxel.clone());
+    		let index = ((self.lod - i) -1) as usize;
+    		self.lod_voxels[index]= parent_voxel.clone();
     		
     	}
     }

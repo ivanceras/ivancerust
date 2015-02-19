@@ -1,5 +1,5 @@
 //morton.rs
-pub fn morton(x:u64, y:u64, z:u64, lod:u8)->u64{
+pub fn encode(x:u64, y:u64, z:u64, lod:u8)->u64{
 	let mut answer:u64 = 0;
 	for i in range(0, lod) {
 		answer |= ((x & (1 << i)) << 2*i) | ((y & (1 << i)) << (2*i + 1)) | ((z & (1 << i)) << (2*i + 2));
@@ -8,7 +8,7 @@ pub fn morton(x:u64, y:u64, z:u64, lod:u8)->u64{
 }
 
 // decode a given 64-bit morton code to an integer (x,y,z) coordinate
-pub fn morton_decode(morton:u64, lod:u8)->(u64, u64, u64){
+pub fn decode(morton:u64, lod:u8)->(u64, u64, u64){
 	let mut x = 0;
 	let mut y = 0;
 	let mut z = 0;
@@ -19,3 +19,10 @@ pub fn morton_decode(morton:u64, lod:u8)->(u64, u64, u64){
 	}
 	(x, y, z)
 }
+
+pub fn a_gt_b(a:u64, b:u64, lod:u8)->bool{
+	let am = decode(a, lod);
+	let bm = decode(b, lod);
+	am > bm
+}
+
