@@ -27,7 +27,7 @@ impl Vector{
 		Vector{x:xnew, y:ynew, z:znew}
 	}
 	
-	pub fn minus(&self, point:Point)->Vector{
+	pub fn minus(&self, point:&Point)->Vector{
 		let x = self.x - point.x as f64;
 		let y = self.y - point.y as f64;
 		let z = self.z - point.z as f64;

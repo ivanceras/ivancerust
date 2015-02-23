@@ -4,8 +4,8 @@ use std::num::Float;
 use point::Point;
 
 pub struct Screen{
-    width:i64,
-    height:i64,
+    pub width:i64,
+    pub height:i64,
     fd:i64,//distance from the eye to the projection screen
     multiplier:f64,
     lod:u8
@@ -15,7 +15,8 @@ impl Screen{
     
     pub fn new(width:i64, height:i64,fd:i64, lod:u8)->Screen{
         let limit = 1 << lod;
-        let multiplier = 2.0 * limit as f64/ width as f64; 
+        let multiplier = 2.0 * limit as f64/ width as f64;
+        //let multiplier = 1.0;
         println!("multiplier: {}", multiplier);
         Screen{width:width, height:height, fd:fd, multiplier:multiplier, lod:lod}
     }

@@ -8,6 +8,12 @@ pub struct Point{
 	pub z:i64
 }
 
+impl Point{
+    pub fn new(x:i64, y:i64, z:i64)->Point{
+        Point{x:x, y:y, z:z}
+    }
+}
+
 impl fmt::String for Point {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({}, {}, {})", self.x, self.y, self.z)

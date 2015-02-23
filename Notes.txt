@@ -36,3 +36,6 @@ LOD = (d / x) * theta.tan()
 
 LOD = d / (width/2) * (fov/2.0).tan()
 
+
+Normals can be expressed in i8,i8,i8 (24 bits) instead of f64, f64, f64 ( 192 bits ) to save space when saving to disk
+
