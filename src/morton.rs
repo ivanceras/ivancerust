@@ -20,9 +20,27 @@ pub fn decode(morton:u64, lod:u8)->(u64, u64, u64){
 	(x, y, z)
 }
 
+
 pub fn a_gt_b(a:u64, b:u64, lod:u8)->bool{
 	let am = decode(a, lod);
 	let bm = decode(b, lod);
 	am > bm
+}
+
+/*
+pub fn a_gt_b(a:u64, b:u64, lod:u8)->bool{
+	let limit = 1 << lod;
+	let (ax, ay, az) = decode(a, lod);
+	let (bx, by, bz) = decode(b, lod);
+	let a_index = ax * limit * limit + ay * limit + az;
+	let b_index = bx * limit * limit + by * limit + bz;
+	a_index > b_index
+}
+*/
+
+pub fn linear_index(morton:u64, lod:u8)->u64{
+	let limit = 1 << lod;
+	let (x, y, z) = decode(morton, lod);
+	x * limit * limit + y * limit + z
 }
 

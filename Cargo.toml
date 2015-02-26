@@ -4,9 +4,20 @@ name = "ivancerust"
 version = "0.0.1"
 authors = ["ivan ceras <ivanceras@gmail.com>"]
 
+
+[lib]
+name = "ivancerust"
+path = "./src/lib.rs"
+
 [dependencies.time]
 git = "https://github.com/rust-lang/time"
 
 
-[dependencies.glutin]
-git = "https://github.com/tomaka/glutin"
+[[example]]
+name = "test_morton"
+path = "./examples/test_morton/main.rs"
+
+
+[[example]]
+name = "render"
+path = "./examples/render/main.rs"

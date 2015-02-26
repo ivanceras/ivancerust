@@ -39,3 +39,21 @@ LOD = d / (width/2) * (fov/2.0).tan()
 
 Normals can be expressed in i8,i8,i8 (24 bits) instead of f64, f64, f64 ( 192 bits ) to save space when saving to disk
 
+
+Links:
+http://raytracey.blogspot.com/2008/08/voxel-ray-tracing-vs-polygon-ray.html
+
+-For deformable objects use deformation lattice, bend the rays opposite to the lattice
+-For particle objects: smoke, mist, cloud, snow, rain  use the grid particle system
+
+Material properties:
+* diffuse
+* reflectance
+* index of refraction
+* transparency is already included in alpha channel (a) in rgba.
+
+Light:
+ * color
+ * intensity
+ 
+

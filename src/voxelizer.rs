@@ -67,19 +67,13 @@ impl Voxelizer{
             }
     }
     
-    //check if point at a certain LOD (level of detail) hits
-     fn hit_at_lod(&self, x:i64, y:i64, z:i64, lod:u8)->bool{
-        let lod_voxel = &self.lod_voxels[lod as usize];
-    	let (xlod, ylod, zlod) = self.voxel.at_lod(x, y, z, lod);
-    	let isset = lod_voxel.hit(xlod, ylod, zlod);
-    	isset
-    }
+   
     
     //recursively checks at low LOD first if it hits, proceeds to the highest detail if all lowe level LOD's are hit
     pub fn hit_optimize(&self, x:i64, y:i64, z:i64)->bool{
     	let mut hit_counter = 0;
     	for detail in range(1, self.lod){//1 to 4
-    		let hit = self.hit_at_lod(x, y, z, detail);//detail is the index of the LOD list, 1 is the lowest LOD
+    		let hit = self.hit_at_lod_optimize(x, y, z, detail);//detail is the index of the LOD list, 1 is the lowest LOD
     		if !hit {
     			return false;
     		}
@@ -93,26 +87,54 @@ impl Voxelizer{
     	false
     }
     
+     //check if point at a certain LOD (level of detail) hits
+     fn hit_at_lod(&self, x:i64, y:i64, z:i64, lod:u8)->bool{
+        let lod_voxel = &self.lod_voxels[lod as usize];
+    	let (xlod, ylod, zlod) = lod_voxel.at_lod(x, y, z, lod);//calculated at voxel LOD level (same level)
+    	let isset = lod_voxel.hit(xlod, ylod, zlod);//no bound checking
+    	isset
+    }
+    //the points are recalculated based on the highest voxel LOD
+    fn hit_at_lod_optimize(&self, x:i64, y:i64, z:i64, lod:u8)->bool{
+        let lod_voxel = &self.lod_voxels[lod as usize];
+    	let (xlod, ylod, zlod) = self.voxel.at_lod(x, y, z, lod);//calculated against the higest voxel LOD
+    	let isset = lod_voxel.hit(xlod, ylod, zlod);
+    	isset
+    }
+    
     //build the voxel LOD's at each level of detail
     pub fn build_voxel_lod(&mut self){
     	 let mut parent_voxel = self.voxel.clone();
+   		 println!("base voxels len: {}", self.voxel.indexes.len());
+   		 //let parent1 = parent_voxel.parent();
+   		 //println!("first parent: {} \n{}",parent1.indexes.len(), parent1);
+   		 //let parent2 = parent1.parent();
+   		 //println!("parent2: {} \n{}",parent2.color_indexes.len(), parent2);
+   		 //let parent3 = parent2.parent();
+   		 //println!("first parent: {} \n{}",parent3.color_indexes.len(), parent3);
+   		 //let parent4 = parent3.parent();
+   		 //println!("parent 4: {} \n{}",parent4.color_indexes.len(), parent4);
+   		 //let parent5 = parent4.parent();
+   		 //println!("parent 5: {} \n{}",parent5.color_indexes.len(), parent5);
+    	 
+    	 
     	 for i in range(0, self.lod){
     		self.lod_voxels.push(Voxel::new(i+1));
     		
     	}
     	 for i in range(0, self.lod){
-    	 	println!("Building voxel at LOD: {}", i);
     		parent_voxel = parent_voxel.parent();
-    		//println!("voxels: {}", parent_voxel);
     		let index = ((self.lod - i) -1) as usize;
+    	 	println!("Building voxel at LOD: {}", index);
+    		println!("lod_voxels[{}]", index);
     		self.lod_voxels[index]= parent_voxel.clone();
-    		
+    		println!("voxels: {}", parent_voxel);
     	}
     }
     
     //trace the voxels at pixel_ray direction, marching the distance up to max_distance
     //the optimum version will traverse the voxel at higer level LOD, go to higer LOD only when a hit is made
-    pub fn trace(&self, pixel_ray:Ray, max_distance:u64, scale:f64)->Color{
+    pub fn trace(&self, pixel_ray:Ray, max_distance:u64, scale:f64, max_lod:u8)->Color{
         let mut length = 0;
         loop {
             let point = pixel_ray.at_length(length);
@@ -125,25 +147,41 @@ impl Voxelizer{
                 return self.voxel.get_color_at_loc(px, py, pz)
             }
             if length >= max_distance {
-                return Color::new(255,255,255,255);
+                return Color::white();
             }
             length += 1;
         }
     }
     
+    /*
+    pub fn trace(&self, pixel_ray:Ray, max_distance:u64, scale:f64, max_lod:u8)->Color{
+        let mut length = 0;
+        let mut current_lod = 4;//start lod at 1 increasing detail when hit, if no hit, increase lod
+        let mut length_increment = 1;
+        let limit = 1 << max_lod;
+        let trace_limit = 1 << current_lod;
+        let voxel_scale = (limit / trace_limit) as f64;
+        //println!("voxel_scale: {}", voxel_scale);
+        loop {
+            let point = pixel_ray.at_length(length);
+            let px = (point.x / (scale * voxel_scale) ).round() as i64;
+            let py = (point.y / (scale * voxel_scale) ).round() as i64;
+            let pz = (point.z / (scale * voxel_scale) ).round() as i64;
+            let hit = self.hit_at_lod(px, py, pz, current_lod);
+            if hit {
+            	//println!("hit at: {},{},{}",px,py,pz);
+            	let lod_voxel = &self.lod_voxels[current_lod as usize];
+            	//println!("lod_voxel.lod: {}", lod_voxel.lod);
+            	let color =  lod_voxel.get_color_at_loc(px, py, pz);
+            	return color;
+            }
+            if length >= max_distance {
+                return Color::white();
+            }
+            length += length_increment;
+        }
+    }
+    */
     
  }  
 
-
-#[test]
-fn morton_test() {
-	let m = morton(1,2,3, 5);
-	let d = morton_decode(m, 5);
-	println!("morton: {}",m);
-	assert!(d == (1,2,3));
-
-	let m1 = morton(20,14,11, 5);
-	let d1 = morton_decode(m1, 5);
-	assert!(d1 == (20,14,11));
-
-}

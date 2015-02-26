@@ -20,7 +20,6 @@ Use quarternions on camera rotations
 Arrays of 8bits or arrays of 64bits.
 Each voxel can be contained either by 64bits or 8bits. A long list of 8bits or 1/8th less of 64bits.
 
-<<<<<<< HEAD
 
 Feb 18:
 
@@ -29,6 +28,9 @@ Feb 18:
 
 8bits indexing is ideal and easier to think about it
 No need for sorting the indexes, since we can compare morton code which one is greate or not by decoding back the morton then calculating the xyz index
-=======
+
 Use opengl instead of ppm files to render the pixels
->>>>>>> ed838945af4edfec3c0acb1ab95b0c6df292e5d3
+
+Feb 25:
+Correct the parent voxel implementation, seems odd.
+

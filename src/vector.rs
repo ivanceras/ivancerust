@@ -27,13 +27,13 @@ impl Vector{
 		Vector{x:xnew, y:ynew, z:znew}
 	}
 	
-	pub fn minus(&self, point:&Point)->Vector{
+	pub fn subtract_point(&self, point:&Point)->Vector{
 		let x = self.x - point.x as f64;
 		let y = self.y - point.y as f64;
 		let z = self.z - point.z as f64;
 		Vector::new(x,y,z)
 	}
-	pub fn add(&self, point:&Point)->Vector{
+	pub fn add_point(&self, point:&Point)->Vector{
 		let x = self.x + point.x as f64;
 		let y = self.y + point.y as f64;
 		let z = self.z + point.z as f64;
@@ -85,7 +85,7 @@ impl Vector{
 	
 }
 
-impl fmt::String for Vector {
+impl fmt::Display for Vector {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({}, {}, {})", self.x, self.y, self.z)
     }
