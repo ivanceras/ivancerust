@@ -10,3 +10,5 @@ pub mod morton;
 pub mod voxelizer;
 pub mod shape;
 pub mod normal;
+pub mod binvox;
+pub mod renderer;

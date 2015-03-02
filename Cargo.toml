@@ -12,12 +12,30 @@ path = "./src/lib.rs"
 [dependencies.time]
 git = "https://github.com/rust-lang/time"
 
+[dependencies.regex]
+
+
+
+[[example]]
+name = "render_lucy"
+path = "./examples/render_lucy.rs"
+
+
+
+[[example]]
+name = "render_shapes"
+path = "./examples/render_shapes.rs"
+
+
+[[example]]
+name = "render_bunny"
+path = "./examples/render_bunny.rs"
+
+[[example]]
+name = "test_at_lod"
+path = "./examples/tests/test_at_lod.rs"
+
 
 [[example]]
 name = "test_morton"
-path = "./examples/test_morton/main.rs"
-
-
-[[example]]
-name = "render"
-path = "./examples/render/main.rs"
+path = "./examples/tests/test_morton.rs"

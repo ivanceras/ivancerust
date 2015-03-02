@@ -2,6 +2,7 @@
 name = "ivancerust"
 version = "0.0.1"
 dependencies = [
+ "regex 0.1.15 (registry+https://github.com/rust-lang/crates.io-index)",
  "time 0.1.17 (git+https://github.com/rust-lang/time)",
 ]
 
@@ -13,6 +14,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "libc"
 version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "regex"
+version = "0.1.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]

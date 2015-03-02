@@ -34,3 +34,22 @@ Use opengl instead of ppm files to render the pixels
 Feb 25:
 Correct the parent voxel implementation, seems odd.
 
+Feb 26:
+Use voxel density justify the rendering of sparse area
+
+Getting the LOD level of detail should be done from the highest detail for each level, not the less accurate parent of parent which will lead to less accurates
+
+Feb 27:
+Build an octree of the parent
+2 ways:
+top down or bottom up.
+
+for equation source voxelizer:top down
+	* start from the lowest LOD (1), traverse through the occupied region then recursively build the tree.
+
+for pre-defined voxelized objects - bottom up.
+	* from the highest LOD, build the lower level LOD traversing up.
+
+Fractals can be done via top down, series of values can be derived by series equation such as pi values, mandrelbot fractals
+
+

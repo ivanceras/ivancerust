@@ -57,3 +57,6 @@ Light:
  * intensity
  
 
+
+Opencl book:
+http://www.fixstars.com/en/opencl/book/OpenCLProgrammingBook/contents/
