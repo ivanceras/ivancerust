@@ -35,15 +35,22 @@ cargo run --example render_shapes
 ```
 This example build a voxelized sphere at a certain LOD, then rendered at lesser LOD
 
-Sphere at LOD 6 = (2^6)^3 = 262144 voxel grid
+Sphere at LOD 6 = (2^6)^3 = 64x64x64 = 262144 voxel grid
 
 ![Sphere LOD 6](https://raw.githubusercontent.com/ivanceras/ivancerust/0.0.3/images/sphere6-trace6.png)
 
-Sphere at LOD 5 = (2^5)^3 = 32768 voxel grid
+
+
+Sphere at LOD 5 = (2^5)^3 = 32x32x32 = 32768 voxel grid
 ![Sphere LOD 5](https://raw.githubusercontent.com/ivanceras/ivancerust/0.0.3/images/sphere6-trace5.png)
 
 
+
+Sphere at LOD 4 = (2^4)^3 = 16x16x16 = 4096 voxel grid
 ![Sphere LOD4](https://raw.githubusercontent.com/ivanceras/ivancerust/0.0.3/images/sphere5-trace4.png)
+
+
+Sphere at LOD 3 = (2^3)^3 = 8x8x8 = 512 voxel grid
 
 ![Sphere LOD3](https://raw.githubusercontent.com/ivanceras/ivancerust/0.0.3/images/sphere5-trace3.png)
 
