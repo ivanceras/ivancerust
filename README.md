@@ -30,9 +30,9 @@ Why? More or less, this is a proof of concept. I've yet to study OpenCL yet to t
 ##Render a shapes
 
 ```
-cargo run --example render_shapes
-
+cargo run --release --example render_shapes
 ```
+
 This example build a voxelized sphere at a certain LOD, then rendered at lesser LOD
 
 Sphere at LOD 6 = (2^6)^3 = 64x64x64 = 262144 voxel grid
@@ -60,8 +60,9 @@ Using binvox format as famous in minecraft
 the binvox are stored in `./data` directory
 
 ```
-cargo run --example render_lucy
+cargo run --release --example render_lucy
 ```
+
 Lucy at LOD 8 = (2^8)^3 = 16777216 voxel grid
 ![Lucy](https://raw.githubusercontent.com/ivanceras/ivancerust/0.0.3/images/lucy8-trace8.png)
 
@@ -70,8 +71,10 @@ Lucy at LOD 8 = (2^8)^3 = 16777216 voxel grid
 ##Render bunny
 
 ```
-cargo run --example render_bunny
+cargo run --release --example render_bunny
 ```
+
+
 Bunny at LOD 7 = (2^7)^3 = 2097152 voxel grid
 
 ![Bunny](https://raw.githubusercontent.com/ivanceras/ivancerust/0.0.3/images/bunny7-trace7.png)
